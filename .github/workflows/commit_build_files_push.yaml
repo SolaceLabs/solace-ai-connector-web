@@ -1,0 +1,46 @@
+name: Build and commit static files
+
+on: 
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.COMMIT_KEY }}
+          ref: ${{ github.ref }}
+      
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          cd src/solace_ai_connector_web/frontend
+          npm install
+          
+      - name: Build Remix app
+        run: |
+          cd src/solace_ai_connector_web/frontend
+          npm run build
+          
+      - name: Commit built files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -f src/solace_ai_connector_web/frontend/static/**
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update built files"
+            git push --force
+          fi

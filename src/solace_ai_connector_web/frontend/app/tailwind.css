@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.markdown > * {
+  all: revert;
+}
+
+.typewriter-container {
+  position: relative;
+  line-height: 1.5;
+}
+
+.animated-text {
+  display: inline;
+}
+
+.word {
+  display: inline-block;
+  white-space: pre-wrap;
+}
+
+.newline {
+  display: block;
+  height: 1.2em;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background-color: currentColor;
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 1s step-start infinite;
+}
+
+/* Notification transitions */
+.notification-enter {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.notification-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+}
+
+.notification-exit {
+  opacity: 1;
+}
+
+.notification-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
