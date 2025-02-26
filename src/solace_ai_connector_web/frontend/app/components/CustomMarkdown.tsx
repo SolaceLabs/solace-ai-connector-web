@@ -7,7 +7,31 @@ interface CustomMarkdownProps {
 }
 
 export const CustomMarkdown = ({ children, className = '' }: CustomMarkdownProps) => {
-  const processedContent = children.replace(/\n\s*\n/g, '\n');
+  // Check if content appears to be HTML
+  const containsHtml = (content: string) => {
+    // Look for HTML document patterns or HTML tags
+    const htmlPatterns = [
+      /<!DOCTYPE\s+html>/i,
+      /<html[\s>]/i,
+      /<head[\s>]/i,
+      /<body[\s>]/i,
+      /<\/[a-z]+>/i,
+    ];
+    
+    return htmlPatterns.some(pattern => pattern.test(content));
+  };
+
+  let processedContent = children.replace(/\n\s*\n/g, '\n');
+  
+  // If content seems to be HTML and not already in a code block
+  if (containsHtml(processedContent) && !processedContent.includes('```')) {
+    // Escape < and > characters to prevent HTML rendering
+    processedContent = processedContent
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+      
+  }
+
   const htmlContent = marked(processedContent) as string;
   
   return (
