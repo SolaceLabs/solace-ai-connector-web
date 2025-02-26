@@ -24,30 +24,30 @@ export const CsvPreview: React.FC<CsvPreviewProps> = ({ content, isExpanded }) =
     }
 
     return (
-        <div className="overflow-x-auto">
-<table className="min-w-full text-xs md:text-sm dark:text-gray-200">
-    <tbody>
-        {rows.map((row, i) => (
-            <tr 
-                key={i} 
-                className={`
-                    ${i === 0 ? 'bg-gray-100 dark:bg-gray-700 font-medium' : ''}
-                    ${i % 2 === 1 ? 'bg-gray-50 dark:bg-gray-800' : ''}
-                `}
-            >
-                {row.map((cell, j) => (
-                    <td 
-                        key={j} 
-                        className="border border-gray-200 dark:border-gray-600 p-2 truncate max-w-[200px] dark:text-white"
-                        title={cell}
-                    >
-                        {cell}
-                    </td>
-                ))}
-            </tr>
-        ))}
-    </tbody>
-</table>
+        <div className="overflow-x-auto scrollbar-themed">
+            <table className="min-w-full text-xs md:text-sm dark:text-gray-200">
+                <tbody>
+                    {rows.map((row, i) => (
+                        <tr 
+                            key={i} 
+                            className={`
+                                ${i === 0 ? 'bg-gray-100 dark:bg-gray-700 font-medium' : ''}
+                                ${i % 2 === 1 ? 'bg-gray-50 dark:bg-gray-800' : ''}
+                            `}
+                        >
+                            {row.map((cell, j) => (
+                                <td 
+                                    key={j} 
+                                    className="border border-gray-200 dark:border-gray-600 p-2 truncate max-w-[200px] dark:text-white"
+                                    title={cell}
+                                >
+                                    {cell}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };
