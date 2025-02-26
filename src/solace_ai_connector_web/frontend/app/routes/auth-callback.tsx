@@ -48,7 +48,7 @@ export default function AuthCallback() {
       }
     };
     exchangeCode();
-  }, [searchParams, configServerUrl]);
+  }, [searchParams]);
 
   const renderContent = () => {
     if (error) {
