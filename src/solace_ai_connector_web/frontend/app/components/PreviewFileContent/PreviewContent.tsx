@@ -121,7 +121,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className,
                     </div>
 
                     {/* Content container */}
-                    <div className={`p-3 ${
+                    <div className={`p-3 scrollbar-themed ${
                         isExpanded ? 'overflow-auto max-h-[500px]' : 'overflow-hidden'
                     }`}>
                         {isCsv ? (
