@@ -6,7 +6,16 @@ export default function AuthCallback() {
   const [searchParams] = useSearchParams();
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const { configServerUrl } = useConfig();
+
+  useEffect(() => {
+    // Check if dark mode is enabled
+    const isDark = document.documentElement.classList.contains('dark') || 
+                   localStorage.getItem('theme') === 'dark' ||
+                   (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setIsDarkMode(isDark);
+  }, []);
 
   useEffect(() => {
     const exchangeCode = async () => {
@@ -39,22 +48,21 @@ export default function AuthCallback() {
       }
     };
     exchangeCode();
-  }, [searchParams]);
+  }, [searchParams, configServerUrl]);
 
   const renderContent = () => {
     if (error) {
       return (
         <div className="text-red-500">
-          <h2>Error</h2>
-          <p>{error}</p>
+          <h2 className={isDarkMode ? "text-white" : "text-black"}>Error</h2>
+          <p className={isDarkMode ? "text-red-400" : "text-red-500"}>{error}</p>
         </div>
       );
     }
-
     if (token) {
       return (
         <div className="space-y-4">
-          <h2 className="text-2xl">Successfully Authenticated!</h2>
+          <h2 className={`text-2xl ${isDarkMode ? "text-white" : "text-black"}`}>Successfully Authenticated!</h2>
           <button 
             onClick={() => window.location.href = '/'}
             className="bg-solace-green text-white px-6 py-2 rounded shadow hover:bg-solace-dark-green"
@@ -64,12 +72,11 @@ export default function AuthCallback() {
         </div>
       );
     }
-
-    return <div>Processing authentication...</div>;
+    return <div className={isDarkMode ? "text-white" : "text-black"}>Processing authentication...</div>;
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+    <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
       <div className="text-center p-8 max-w-lg">
         {renderContent()}
       </div>
