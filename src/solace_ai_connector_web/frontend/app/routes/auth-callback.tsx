@@ -10,10 +10,13 @@ export default function AuthCallback() {
   const { configServerUrl } = useConfig();
 
   useEffect(() => {
-    // Check if dark mode is enabled
-    const isDark = document.documentElement.classList.contains('dark') || 
-                   localStorage.getItem('theme') === 'dark' ||
-                   (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const hasDarkClass = document.documentElement.classList.contains('dark');
+    const storedPreference = localStorage.getItem('darkMode') === 'true';
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const useSystemPreference = !localStorage.getItem('darkMode') && prefersDarkScheme;
+    
+    // Set dark mode if any of the conditions are true
+    const isDark = hasDarkClass || storedPreference || useSystemPreference;
     setIsDarkMode(isDark);
   }, []);
 
@@ -54,15 +57,15 @@ export default function AuthCallback() {
     if (error) {
       return (
         <div className="text-red-500">
-          <h2 className={isDarkMode ? "text-white" : "text-black"}>Error</h2>
-          <p className={isDarkMode ? "text-red-400" : "text-red-500"}>{error}</p>
+          <h2 className="text-black dark:text-white">Error</h2>
+          <p className="text-red-500 dark:text-red-400">{error}</p>
         </div>
       );
     }
     if (token) {
       return (
         <div className="space-y-4">
-          <h2 className={`text-2xl ${isDarkMode ? "text-white" : "text-black"}`}>Successfully Authenticated!</h2>
+          <h2 className="text-2xl text-black dark:text-white">Successfully Authenticated!</h2>
           <button 
             onClick={() => window.location.href = '/'}
             className="bg-solace-green text-white px-6 py-2 rounded shadow hover:bg-solace-dark-green"
@@ -72,13 +75,15 @@ export default function AuthCallback() {
         </div>
       );
     }
-    return <div className={isDarkMode ? "text-white" : "text-black"}>Processing authentication...</div>;
+    return <div className="text-black dark:text-white">Processing authentication...</div>;
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
-      <div className="text-center p-8 max-w-lg">
-        {renderContent()}
+    <div className={`${isDarkMode ? "dark" : ""} min-h-screen flex items-center justify-center`}>
+      <div className="min-h-screen w-full flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="text-center p-8 max-w-lg">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
