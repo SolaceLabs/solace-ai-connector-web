@@ -1,5 +1,5 @@
-import{r as i,j as t}from"./index-DOqvKUId.js";import{C as h}from"./ConfigProvider-BKYrVbJF.js";import{u as d,d as y,e as x,O as g}from"./index-Cx_IO0gb.js";import{f as S,_ as w,M as j,L as k,S as M}from"./components-C1shmrcO.js";/**
- * @remix-run/react v2.15.3
+import{r as i,j as t}from"./index-DOqvKUId.js";import{C as h}from"./ConfigProvider-BKYrVbJF.js";import{u as d,d as y,e as x,O as g}from"./index-B0DtMQVx.js";import{f as S,_ as w,M as j,L as k,S as M}from"./components-CqnZrdHL.js";/**
+ * @remix-run/react v2.16.0
  *
  * Copyright (c) Remix Software Inc.
  *

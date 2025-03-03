@@ -306,7 +306,9 @@ class WebChatServer(RestBase):
                         response.raise_for_status()
                     except Exception:
                         return {"error": "Unauthorized"}, 401
-                return {"error": "Failed to get response"}, 500
+                # Only return 500 if both the original request and the token refresh attempt failed
+                if response.status_code != 200: 
+                    return {"error": "Failed to get response"}, 500
                     
             return Response(
                 self._create_stream_response(response, new_access_token_formatted),

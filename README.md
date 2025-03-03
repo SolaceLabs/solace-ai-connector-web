@@ -46,7 +46,7 @@ Run this in the root of the project to build the wheel package:
 python -m build -w
 ```
 
-This will create a /dist folder containing the wheel file which needs to be installed as a dependency in the ai-eda-solace-chat project.
+This will create a /dist folder containing the wheel file which needs to be installed as a dependency in the solace-agent-mesh project.
 
 One suggested workflow for installing the wheel:
 
@@ -100,7 +100,7 @@ WEBUI_FRONTEND_USE_AUTHORIZATION=False
 WEBUI_FRONTEND_URL=http://localhost:5173
 ```
 
-This configuration allows you to use `npm run dev` while still connecting to the server run by EDA chat.
+This configuration allows you to use `npm run dev` while still connecting to the REST API run by Solace Agent Mesh.
 
 ## Notes
 
