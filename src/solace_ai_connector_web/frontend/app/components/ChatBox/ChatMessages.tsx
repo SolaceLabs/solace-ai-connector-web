@@ -1,20 +1,23 @@
-// ChatMessages.tsx
+// Update ChatMessages.tsx
 import { useRef, useMemo } from "react";
 import { Message } from "./ChatBox.types";
 import MessageBubble from "./MessageBubble";
+import { FileAttachment } from "../FileDisplay";
 
 interface ChatMessagesProps {
   messages: Message[];
   scrollToBottom: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  onPreviewFile?: (file: FileAttachment) => void;
 }
 
 export default function ChatMessages({ 
   messages, 
   scrollToBottom,
-  messagesEndRef 
+  messagesEndRef,
+  onPreviewFile
 }: Readonly<ChatMessagesProps>) {
-  // Keep track of which messages have been "fully rendered" so typewriter doesn't replay
+  // Keep track of which messages have been "fully rendered"
   const renderedMessagesRef = useRef(new Set<number>());
 
   const messageElements = useMemo(() => {
@@ -23,8 +26,6 @@ export default function ChatMessages({
       const isBotMessage = !msg.isUser && !msg.isStatusMessage;
       const alreadyRendered = renderedMessagesRef.current.has(idx);
 
-      // If this is a bot message that hasn't been rendered before,
-      // we do the typewriter effect
       if (isBotMessage && !alreadyRendered) {
         renderedMessagesRef.current.add(idx);
       }
@@ -35,10 +36,11 @@ export default function ChatMessages({
           msg={msg}
           idx={idx}
           alreadyRendered={alreadyRendered}
+          onPreviewFile={onPreviewFile}
         />
       );
     });
-  }, [messages, scrollToBottom]);
+  }, [messages, onPreviewFile]);
 
   // Clear the list if messages is empty
   if (messages.length === 0) {

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Message } from "./ChatBox.types";
 import { CustomMarkdown } from "../CustomMarkdown";
-import FileDisplay, { FileRow } from "../FileDisplay";
+import FileDisplay, { FileAttachment, FileRow } from "../FileDisplay";
 import LoadingIndicator from "./LoadingIndicator";
 import { FeedbackButtons } from './FeedbackButtons';
 import { useConfig } from "../ConfigProvider";
@@ -10,10 +10,11 @@ interface MessageBubbleProps {
   msg: Message;
   idx: number;
   alreadyRendered: boolean;
+  onPreviewFile?: (file: FileAttachment) => void;
 }
 
-function MessageBubble({ msg, idx, alreadyRendered }: Readonly<MessageBubbleProps>) {
-  const { configCollectFeedback} = useConfig();
+function MessageBubble({ msg, idx, alreadyRendered, onPreviewFile }: Readonly<MessageBubbleProps>) {
+  const { configCollectFeedback } = useConfig();
 
   const renderMessageContent = (msg: Message) => {
     if (msg.isUser) {
@@ -69,7 +70,11 @@ function MessageBubble({ msg, idx, alreadyRendered }: Readonly<MessageBubbleProp
           {msg.files && msg.files.length > 0 && (
             <div className="mt-2 space-y-2 self-stretch">
               {msg.files.map((file, fileIdx) => (
-                <FileDisplay key={`bot-file-${idx}-${fileIdx}`} file={file} />
+                <FileDisplay 
+                  key={`bot-file-${idx}-${fileIdx}`} 
+                  file={file} 
+                  onPreview={onPreviewFile ? () => onPreviewFile(file) : undefined}
+                />
               ))}
               {!msg.text?.trim() && configCollectFeedback && !msg.isUser && !msg.isStatusMessage && (
                 msg.metadata ? (

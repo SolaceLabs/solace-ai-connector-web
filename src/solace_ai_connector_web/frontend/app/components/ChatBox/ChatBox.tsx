@@ -3,6 +3,8 @@ import { FiArrowDown } from "react-icons/fi";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import { Message } from "./ChatBox.types";
+import { FileAttachment } from "../FileDisplay";
+import PreviewPanel from "../PreviewFileContent/PreviewPanel";
 
 interface ChatBoxProps {
   messages: Message[];
@@ -24,6 +26,7 @@ export default function ChatBox({
   setSelectedFiles,
 }: Readonly<ChatBoxProps>) {
   const [userHasScrolled, setUserHasScrolled] = useState(false);
+  const [previewFile, setPreviewFile] = useState<FileAttachment | null>(null);
   const isAutoScrolling = useRef(false);
   const lastScrollY = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -64,7 +67,7 @@ export default function ChatBox({
   }, [isNearBottom]);
 
   useEffect(() => {
-    lastScrollY.current = window.scrollY; // Initialize
+    lastScrollY.current = window.scrollY;
     window.addEventListener("scroll", handleWindowScroll);
     return () => {
       window.removeEventListener("scroll", handleWindowScroll);
@@ -89,53 +92,84 @@ export default function ChatBox({
     }, 300);
   }, [isNearBottom]);
 
-
   useEffect(() => {
     if (!userHasScrolled) {
       scrollToBottom();
     }
   }, [messages, userHasScrolled, scrollToBottom]);
 
+  const handlePreviewFile = (file: FileAttachment) => {
+    setPreviewFile(file);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewFile(null);
+  };
+
   return (
     <div className="flex flex-col h-full relative">
       {/* Messages container */}
-      <div className="flex-1">
+      <div
+        className={
+          previewFile
+            ? "flex-1 pr-[200px] transition-all duration-300"
+            : "flex-1"
+        }
+      >
         <ChatMessages
           messages={messages}
           scrollToBottom={scrollToBottom}
           messagesEndRef={messagesEndRef}
+          onPreviewFile={handlePreviewFile}
         />
       </div>
+
+      {/* Preview Panel */}
+      {previewFile && (
+        <PreviewPanel
+          file={previewFile}
+          onClose={handleClosePreview}
+        />
+      )}
 
       {/* Floating arrow to return to bottom */}
       {userHasScrolled && (
         <button
           type="button"
           onClick={scrollToBottom}
-          className="
-            fixed z-50 bottom-20 left-1/2 -translate-x-1/2 
+          className={`
+            fixed z-50 bottom-20 
+            ${previewFile ? 'left-[calc(55%-200px)]' : 'left-1/2'}
+            -translate-x-1/2
             p-2 rounded-full bg-slate-300 dark:bg-gray-700
             text-black dark:text-gray-200
             shadow hover:bg-gray-300 dark:hover:bg-gray-600
             transition-colors
-          "
+          `}
         >
           <FiArrowDown className="w-4 h-4" strokeWidth={3} />
         </button>
       )}
+
       {/* Input area */}
       <div
-        className="
-          fixed bottom-0 left-0 right-0 z-10 
+        className={`
+          fixed bottom-0 left-0 
+          z-10 
           bg-white/95 dark:bg-gray-900/95 
           backdrop-blur-sm
-        "
+          transition-all duration-300
+          ${previewFile ? 'right-[200px]' : 'right-0'}
+        `}
       >
         <div className="md:w-2/4 w-11/12 mx-auto py-2">
           <ChatInput
             userInput={userInput}
             setUserInput={setUserInput}
-            handleSubmit={handleSubmit}
+            handleSubmit={(e) => {
+              handleSubmit(e, selectedFiles);
+              setSelectedFiles([]);
+            }}
             isResponding={isResponding}
             selectedFiles={selectedFiles}
             setSelectedFiles={setSelectedFiles}

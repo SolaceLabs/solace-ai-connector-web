@@ -1,14 +1,21 @@
+// Update PreviewContent.tsx
 import { useState, useMemo } from 'react';
 import { FileAttachment } from '../FileDisplay';
-import {CsvPreview} from "./CsvPreview"
+import { CsvPreview } from "./CsvPreview";
 
 interface PreviewContentProps {
     file: FileAttachment;
     className?: string;
     onDownload: () => void;
+    onPreview?: () => void;
 }
 
-export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className, onDownload }) => {
+export const PreviewContent: React.FC<PreviewContentProps> = ({ 
+    file, 
+    className, 
+    onDownload, 
+    onPreview 
+}) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
     
@@ -26,9 +33,6 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className,
         navigator.clipboard.writeText(decodedContent);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 1000);
-    };
-    const handleDownload = () => {
-        onDownload();
     };
 
     return (
@@ -58,9 +62,38 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className,
                         
                         {/* Action buttons */}
                         <div className="flex items-center gap-2">
+                            {/* Preview button (if applicable) */}
+                            {onPreview && (
+                                <button
+                                    onClick={onPreview}
+                                    className="p-1.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                    title="Preview file"
+                                >
+                                    <svg 
+                                        className="w-4 h-4 text-gray-600 dark:text-gray-300" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
+                                    </svg>
+                                </button>
+                            )}
+                            
                             {/* Download button */}
                             <button
-                                onClick={handleDownload}
+                                onClick={onDownload}
                                 className="p-1.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                                 title="Download file"
                             >
