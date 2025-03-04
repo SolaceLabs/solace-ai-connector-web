@@ -31,6 +31,7 @@ export default function ChatBox({
 }: Readonly<ChatBoxProps>) {
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [previewFile, setPreviewFile] = useState<FileAttachment | null>(null);
+  const [shouldAutoRun, setShouldAutoRun] = useState(false);
   const isAutoScrolling = useRef(false);
   const lastScrollY = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -87,7 +88,6 @@ export default function ChatBox({
   const scrollToBottom = useCallback(() => {
     isAutoScrolling.current = true;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-
     setTimeout(() => {
       isAutoScrolling.current = false;
       if (isNearBottom()) {
@@ -102,14 +102,22 @@ export default function ChatBox({
     }
   }, [messages, userHasScrolled, scrollToBottom]);
 
-  const handlePreviewFile = (file: FileAttachment) => {
+  // Handle previewing a file, with option to automatically run it
+  const handlePreviewFile = useCallback((file: FileAttachment, autoRun = false) => {
     setPreviewFile(file);
+    setShouldAutoRun(autoRun);
     // Notify parent that preview is opening
     if (onPreviewOpen) onPreviewOpen();
-  };
+  }, [onPreviewOpen]);
+
+  // Handle running a file (open preview and set auto-run flag)
+  const handleRunFile = useCallback((file: FileAttachment) => {
+    handlePreviewFile(file, true);
+  }, [handlePreviewFile]);
 
   const handleClosePreview = () => {
     setPreviewFile(null);
+    setShouldAutoRun(false);
     // Notify parent that preview is closing
     if (onPreviewClose) onPreviewClose();
   };
@@ -129,40 +137,40 @@ export default function ChatBox({
           scrollToBottom={scrollToBottom}
           messagesEndRef={messagesEndRef}
           onPreviewFile={handlePreviewFile}
+          onRunFile={handleRunFile}
         />
       </div>
-
       {/* Preview Panel */}
       {previewFile && (
         <PreviewPanel
           file={previewFile}
           onClose={handleClosePreview}
+          autoRun={shouldAutoRun}
         />
       )}
-
       {/* Floating arrow to return to bottom */}
       {userHasScrolled && (
-  <button
-    type="button"
-    onClick={scrollToBottom}
-    className={`
-      fixed bottom-20
-      left-1/2
-      transform
-      -translate-x-1/2
-      p-2 rounded-full bg-slate-300 dark:bg-gray-700
-      text-black dark:text-gray-200
-      shadow hover:bg-gray-300 dark:hover:bg-gray-600
-      transition-colors
-      ${previewFile 
-        ? 'ml-[-350px]' // When preview is open, adjust to compensate for the shifted input
-        : ''
-      }
-    `}
-  >
-    <FiArrowDown className="w-4 h-4" strokeWidth={3} />
-  </button>
-)}
+        <button
+          type="button"
+          onClick={scrollToBottom}
+          className={`
+            fixed bottom-20
+            left-1/2
+            transform
+            -translate-x-1/2
+            p-2 rounded-full bg-slate-300 dark:bg-gray-700
+            text-black dark:text-gray-200
+            shadow hover:bg-gray-300 dark:hover:bg-gray-600
+            transition-colors
+            ${previewFile 
+              ? 'ml-[-350px]' // When preview is open, adjust to compensate for the shifted input
+              : ''
+            }
+          `}
+        >
+          <FiArrowDown className="w-4 h-4" strokeWidth={3} />
+        </button>
+      )}
 
       {/* Input area */}
       <div

@@ -2,22 +2,24 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { FileAttachment } from '../FileDisplay';
 import HtmlPreviewPanel from './HtmlPreviewPanel';
 import { isHtmlFile, isMermaidFile, isCsvFile } from './PreviewHelpers';
-import {CsvPreviewPanel} from './CsvPreviewPanel';
+import { CsvPreviewPanel } from './CsvPreviewPanel';
 
 interface PreviewPanelProps {
   file: FileAttachment;
   onClose: () => void;
   initialWidth?: number;
+  autoRun?: boolean;
 }
 
 const PreviewPanel: React.FC<PreviewPanelProps> = ({ 
   file, 
   onClose, 
-  initialWidth = 600 
+  initialWidth = 600,
+  autoRun = false
 }) => {
   const [width, setWidth] = useState(initialWidth);
   const [isResizing, setIsResizing] = useState(false);
-  const [isRendering, setIsRendering] = useState(false);
+  const [isRendering, setIsRendering] = useState(autoRun);
   const panelRef = useRef<HTMLDivElement>(null);
   
   // Decode base64 content
@@ -28,10 +30,11 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
   const isHtmlContent = isHtmlFile(file.name);
   const isMermaidContent = isMermaidFile(file.name);
 
-  // Reset rendering state when file changes
   useEffect(() => {
-    setIsRendering(false);
-  }, [file]);
+    if ((isHtmlContent || isMermaidContent) && autoRun) {
+      setIsRendering(true);
+    }
+  }, [autoRun, file, isHtmlContent, isMermaidContent]);
   
   // Add a class to the body when resizing to prevent text selection
   useEffect(() => {
@@ -81,18 +84,18 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
     e.preventDefault();
     setIsResizing(true);
   };
-
+  
   const toggleRendering = () => {
     setIsRendering(prev => !prev);
   };
-
+  
   return (
     <div 
       ref={panelRef}
       className={`fixed top-[72px] right-0 bottom-0 bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 z-30 flex flex-col ${isResizing ? 'select-none' : ''}`}
       style={{ width: `${width}px` }}
     >
-    {/* Resizing handle */}
+      {/* Resizing handle */}
       <div 
         className="absolute top-0 bottom-0 left-0 w-1 cursor-col-resize hover:bg-solace-blue dark:hover:bg-solace-green"
         onMouseDown={handleMouseDown}
@@ -105,14 +108,14 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
         </h3>
         <div className="flex items-center">
           {/* Only show Run button for supported content */}
-            {(isHtmlContent || isMermaidContent) && (
+          {(isHtmlContent || isMermaidContent) && (
             <button
-                onClick={toggleRendering}
+              onClick={toggleRendering}
               className="px-2 py-1 mr-2 rounded-md bg-gray-200 dark:bg-solace-green hover:bg-gray-300 dark:hover:bg-green-600 text-xs font-medium"
             >
-                {isRendering ? 'Stop' : 'Run'}
+              {isRendering ? 'Stop' : 'Run'}
             </button>
-            )}
+          )}
 
           <button 
             onClick={onClose}
@@ -138,20 +141,20 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
       
       {/* Content section*/}
       <div className="flex-1 pt-4 px-4 pb-8 overflow-auto">
-  {isCsvContent ? (
-    <CsvPreviewPanel content={decodedContent} width={width - 32} />
-  ) : (isHtmlContent || isMermaidContent) && isRendering ? (
-    <HtmlPreviewPanel 
-      content={decodedContent} 
-      width={width - 32}
-      isMermaid={isMermaidContent}
-    />
-  ) : (
-    <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-      {decodedContent}
-    </pre>
-  )}
-</div>
+        {isCsvContent ? (
+          <CsvPreviewPanel content={decodedContent} width={width - 32} />
+        ) : (isHtmlContent || isMermaidContent) && isRendering ? (
+          <HtmlPreviewPanel 
+            content={decodedContent} 
+            width={width - 32}
+            isMermaid={isMermaidContent}
+          />
+        ) : (
+          <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+            {decodedContent}
+          </pre>
+        )}
+      </div>
     </div>
   );
 };

@@ -11,11 +11,18 @@ interface MessageBubbleProps {
   idx: number;
   alreadyRendered: boolean;
   onPreviewFile?: (file: FileAttachment) => void;
+  onRunFile?: (file: FileAttachment) => void;
 }
 
-function MessageBubble({ msg, idx, alreadyRendered, onPreviewFile }: Readonly<MessageBubbleProps>) {
+function MessageBubble({ 
+  msg, 
+  idx, 
+  alreadyRendered, 
+  onPreviewFile,
+  onRunFile
+}: Readonly<MessageBubbleProps>) {
   const { configCollectFeedback } = useConfig();
-
+  
   const renderMessageContent = (msg: Message) => {
     if (msg.isUser) {
       return <span>{msg.text}</span>;
@@ -36,7 +43,7 @@ function MessageBubble({ msg, idx, alreadyRendered, onPreviewFile }: Readonly<Me
 
     return <CustomMarkdown>{msg.text}</CustomMarkdown>;
   };
-
+  
   return (
     <div className={`my-4 flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
       <div className="relative">
@@ -74,6 +81,7 @@ function MessageBubble({ msg, idx, alreadyRendered, onPreviewFile }: Readonly<Me
                   key={`bot-file-${idx}-${fileIdx}`} 
                   file={file} 
                   onPreview={onPreviewFile ? () => onPreviewFile(file) : undefined}
+                  onRun={onRunFile ? () => onRunFile(file) : undefined}
                 />
               ))}
               {!msg.text?.trim() && configCollectFeedback && !msg.isUser && !msg.isStatusMessage && (
@@ -89,7 +97,6 @@ function MessageBubble({ msg, idx, alreadyRendered, onPreviewFile }: Readonly<Me
               )}
             </div>
           )}
-
           {/* User-uploaded files */}
           {msg.uploadedFiles && msg.uploadedFiles.length > 0 && (
             <div className="mt-2 space-y-2 self-stretch ml-4">
@@ -99,7 +106,6 @@ function MessageBubble({ msg, idx, alreadyRendered, onPreviewFile }: Readonly<Me
             </div>
           )}
         </div>
-
         {/* Avatar */}
         <span
           className={`absolute -top-6 ${

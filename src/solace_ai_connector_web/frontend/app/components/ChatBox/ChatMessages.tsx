@@ -9,13 +9,15 @@ interface ChatMessagesProps {
   scrollToBottom: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   onPreviewFile?: (file: FileAttachment) => void;
+  onRunFile?: (file: FileAttachment) => void;
 }
 
 export default function ChatMessages({ 
   messages, 
   scrollToBottom,
   messagesEndRef,
-  onPreviewFile
+  onPreviewFile,
+  onRunFile
 }: Readonly<ChatMessagesProps>) {
   // Keep track of which messages have been "fully rendered"
   const renderedMessagesRef = useRef(new Set<number>());
@@ -37,6 +39,7 @@ export default function ChatMessages({
           idx={idx}
           alreadyRendered={alreadyRendered}
           onPreviewFile={onPreviewFile}
+          onRunFile={onRunFile}
         />
       );
     });

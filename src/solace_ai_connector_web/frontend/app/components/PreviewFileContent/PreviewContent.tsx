@@ -1,20 +1,22 @@
 import { useState, useMemo } from 'react';
 import { FileAttachment } from '../FileDisplay';
 import { CsvPreviewMessage } from "./CsvPreviewMessage";
-import { isCsvFile } from './PreviewHelpers';
+import { isCsvFile, isHtmlFile, isMermaidFile } from './PreviewHelpers';
 
 interface PreviewContentProps {
     file: FileAttachment;
     className?: string;
     onDownload: () => void;
     onPreview?: () => void;
+    onRun?: () => void;
 }
 
 export const PreviewContent: React.FC<PreviewContentProps> = ({ 
     file, 
     className, 
     onDownload, 
-    onPreview 
+    onPreview,
+    onRun
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
@@ -26,15 +28,17 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
             return 'Unable to decode file content';
         }
     }, [file.content]);
-
+    
     const isCsv = isCsvFile(file.name);
-
+    // Check if this file type is renderable (HTML or Mermaid)
+    const isRenderable = isHtmlFile(file.name) || isMermaidFile(file.name);
+    
     const handleCopy = () => {
         navigator.clipboard.writeText(decodedContent);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 1000);
     };
-
+    
     return (
         <div className={`mt-2 w-full max-w-sm md:max-w-md ${className}`}>
             <div className="relative">
@@ -62,6 +66,34 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
                         
                         {/* Action buttons */}
                         <div className="flex items-center gap-2">
+                            {/* Run button (if renderable) */}
+                            {isRenderable && onRun && (
+                                <button
+                                    onClick={onRun}
+                                    className="p-1.5 rounded bg-green-200 dark:bg-green-700 hover:bg-green-300 dark:hover:bg-green-600 transition-colors"
+                                    title="Run code"
+                                >
+                                    <svg 
+                                        className="w-4 h-4 text-green-800 dark:text-green-300" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        strokeWidth={2}
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+                                        />
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            d="M10 8l6 4-6 4V8z"
+                                        />
+                                    </svg>
+                                </button>
+                            )}    
                             {/* Preview button (if applicable) */}
                             {onPreview && (
                                 <button
@@ -111,7 +143,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
                                     />
                                 </svg>
                             </button>
-
+                            
                             {/* Copy button */}
                             <button
                                 onClick={handleCopy}
@@ -152,7 +184,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
                             </button>
                         </div>
                     </div>
-
+                    
                     {/* Content container */}
                     <div className={`p-3 scrollbar-themed ${
                         isExpanded ? 'overflow-auto max-h-[500px]' : 'overflow-hidden'
