@@ -1,7 +1,7 @@
-// Update PreviewContent.tsx
 import { useState, useMemo } from 'react';
 import { FileAttachment } from '../FileDisplay';
-import { CsvPreview } from "./CsvPreview";
+import { CsvPreviewMessage } from "./CsvPreviewMessage";
+import { isCsvFile } from './PreviewHelpers';
 
 interface PreviewContentProps {
     file: FileAttachment;
@@ -27,7 +27,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
         }
     }, [file.content]);
 
-    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    const isCsv = isCsvFile(file.name);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(decodedContent);
@@ -158,7 +158,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
                         isExpanded ? 'overflow-auto max-h-[500px]' : 'overflow-hidden'
                     }`}>
                         {isCsv ? (
-                            <CsvPreview content={decodedContent} isExpanded={isExpanded} />
+                            <CsvPreviewMessage content={decodedContent} isExpanded={isExpanded} />
                         ) : (
                             <pre className="font-mono text-xs md:text-sm text-gray-800 dark:text-gray-200">
                                 <code>

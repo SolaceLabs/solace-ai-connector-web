@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 
-interface CsvPreviewProps {
+interface CsvPreviewMessageProps {
     content: string;
     isExpanded: boolean;
 }
 
-export const CsvPreview: React.FC<CsvPreviewProps> = ({ content, isExpanded }) => {
+export const CsvPreviewMessage: React.FC<CsvPreviewMessageProps> = ({ content, isExpanded }) => {
     const rows = useMemo(() => {
         try {
             const lines = content.trim().split('\n');

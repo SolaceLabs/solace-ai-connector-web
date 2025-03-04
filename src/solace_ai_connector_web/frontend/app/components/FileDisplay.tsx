@@ -15,10 +15,10 @@ const FileDisplay: React.FC<FileDisplayProps> = ({ file, onPreview }) => {
   const isImage = file.mime_type?.startsWith("image/");
   const isTextBased =
     file.mime_type?.startsWith("text/") ||
-    file.name.match(/\.(txt|json|csv|md|log|html|htm|css|js)$/i);
+    file.name.match(/\.(txt|json|csv|md|log|html|htm|css|js|mmd|mermaid)$/i);
 
   // Check if this file type is previewable in panel
-  const isPreviewable = file.name.match(/\.(txt|json|csv|md|log|html|htm|css|js)$/i);
+  const isRenderable = file.name.match(/\.(html|mmd|mermaid)$/i);
 
   const handleDownload = () => {
     const blob = new Blob(
@@ -47,7 +47,7 @@ const FileDisplay: React.FC<FileDisplayProps> = ({ file, onPreview }) => {
           <FileRow 
             filename={file.name} 
             onDownload={handleDownload}
-            onPreview={isPreviewable && onPreview ? () => onPreview(file) : undefined}
+            onPreview={onPreview ? () => onPreview(file) : undefined}
           />
         </div>
       </div>
@@ -59,7 +59,7 @@ const FileDisplay: React.FC<FileDisplayProps> = ({ file, onPreview }) => {
         <PreviewContent 
           file={file} 
           onDownload={handleDownload}
-          onPreview={isPreviewable && onPreview ? () => onPreview(file) : undefined}
+          onPreview={onPreview ? () => onPreview(file) : undefined}
         />
       </div>
     );
@@ -70,7 +70,7 @@ const FileDisplay: React.FC<FileDisplayProps> = ({ file, onPreview }) => {
       <FileRow 
         filename={file.name} 
         onDownload={handleDownload}
-        onPreview={isPreviewable && onPreview ? () => onPreview(file) : undefined}
+        onPreview={onPreview ? () => onPreview(file) : undefined}
       />
     </div>
   );

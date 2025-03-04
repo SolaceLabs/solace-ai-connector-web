@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { FileAttachment } from '../FileDisplay';
-import { SandpackPreviewRef } from '@codesandbox/sandpack-react/unstyled';
 import HtmlPreviewPanel from './HtmlPreviewPanel';
+import { isHtmlFile, isMermaidFile, isCsvFile } from './PreviewHelpers';
+import {CsvPreviewPanel} from './CsvPreviewPanel';
 
 interface PreviewPanelProps {
   file: FileAttachment;
@@ -18,15 +19,15 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const previewRef = useRef<SandpackPreviewRef>(null);
   
   // Decode base64 content
   const decodedContent = atob(file.content);
   
   // Check if content is CSV or HTML
-  const isCsvContent = useCsvDetection(file.name, decodedContent);
-  const isHtmlContent = useHtmlDetection(file.name, decodedContent);
-  
+  const isCsvContent = isCsvFile(file.name);
+  const isHtmlContent = isHtmlFile(file.name);
+  const isMermaidContent = isMermaidFile(file.name);
+
   // Reset rendering state when file changes
   useEffect(() => {
     setIsRendering(false);
@@ -104,14 +105,14 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
         </h3>
         <div className="flex items-center">
           {/* Only show Run button for supported content */}
-          {isHtmlContent && (
+            {(isHtmlContent || isMermaidContent) && (
             <button
-              onClick={toggleRendering}
+                onClick={toggleRendering}
               className="px-2 py-1 mr-2 rounded-md bg-gray-200 dark:bg-solace-green hover:bg-gray-300 dark:hover:bg-green-600 text-xs font-medium"
             >
-              {isRendering ? 'Stop' : 'Run'}
+                {isRendering ? 'Stop' : 'Run'}
             </button>
-          )}
+            )}
 
           <button 
             onClick={onClose}
@@ -137,111 +138,22 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
       
       {/* Content section*/}
       <div className="flex-1 pt-4 px-4 pb-8 overflow-auto">
-        {isCsvContent ? (
-          <CsvPreviewPanel content={decodedContent} width={width - 32} />
-        ) : isHtmlContent && isRendering ? (
-          <HtmlPreviewPanel 
-            content={decodedContent} 
-            width={width - 32} 
-          />
-        ) : (
-          <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-            {decodedContent}
-          </pre>
-        )}
-      </div>
+  {isCsvContent ? (
+    <CsvPreviewPanel content={decodedContent} width={width - 32} />
+  ) : (isHtmlContent || isMermaidContent) && isRendering ? (
+    <HtmlPreviewPanel 
+      content={decodedContent} 
+      width={width - 32}
+      isMermaid={isMermaidContent}
+    />
+  ) : (
+    <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+      {decodedContent}
+    </pre>
+  )}
+</div>
     </div>
   );
 };
-
-// Modified CsvPreview for Panel component
-const CsvPreviewPanel: React.FC<{content: string; width: number}> = ({ content, width }) => {
-  const rows = useMemo(() => {
-    try {
-      const lines = content.trim().split('\n');
-      const parsed = lines
-        .filter(line => line.trim())
-        .map(line => line.split(',').map(cell => cell.trim()));
-      
-      return parsed;
-    } catch (e) {
-      return [];
-    }
-  }, [content]);
-
-  if (!rows.length) {
-    return <div className="text-gray-500 dark:text-gray-400">No valid CSV content found</div>;
-  }
-
-  return (
-    <div 
-      className="overflow-x-auto scrollbar-themed" 
-      style={{ maxWidth: `${width}px`, maxHeight: 'calc(100vh - 200px)' }}
-    >
-      <table className="min-w-full text-sm dark:text-gray-200">
-        <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0 z-10">
-          {rows.length > 0 && (
-            <tr>
-              {rows[0].map((header, i) => (
-                <th key={i} className="border border-gray-200 dark:border-gray-600 p-2 font-medium text-left dark:text-white">
-                  {header}
-                </th>
-              ))}
-            </tr>
-          )}
-        </thead>
-        <tbody>
-          {rows.slice(1).map((row, i) => (
-            <tr 
-              key={i} 
-              className={i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}
-            >
-              {row.map((cell, j) => (
-                <td 
-                  key={j} 
-                  className="border border-gray-200 dark:border-gray-600 p-2 truncate dark:text-white"
-                  title={cell}
-                >
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-// Helper function to detect if content is CSV
-function useCsvDetection(fileName: string, content: string): boolean {
-  return (
-    fileName.toLowerCase().endsWith('.csv') || 
-    (
-      content.includes(',') && 
-      content.split('\n').length > 1 && 
-      content.split('\n')[0].split(',').length > 1 &&
-      content.split('\n').every(line => 
-        line.trim() === '' || line.split(',').length === content.split('\n')[0].split(',').length
-      )
-    )
-  );
-}
-
-function useHtmlDetection(fileName: string, content: string): boolean {
-    // Check file extension
-    if (fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm')) {
-      return true;
-    }
-    
-    // Check for HTML content patterns
-    const normalizedContent = content.trim().toLowerCase();
-    return (
-      normalizedContent.startsWith('<!doctype html>') ||
-      normalizedContent.startsWith('<html') ||
-      (normalizedContent.includes('<body') && normalizedContent.includes('</body>')) ||
-      (normalizedContent.includes('<head') && normalizedContent.includes('</head>'))
-    );
-  }
 
 export default PreviewPanel;
