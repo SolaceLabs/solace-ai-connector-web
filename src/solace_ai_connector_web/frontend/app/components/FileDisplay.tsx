@@ -18,7 +18,7 @@ const FileDisplay: React.FC<FileDisplayProps> = ({ file, onPreview }) => {
     file.name.match(/\.(txt|json|csv|md|log|html|htm|css|js)$/i);
 
   // Check if this file type is previewable in panel
-  const isPreviewable = file.name.match(/\.(html|htm)$/i);
+  const isPreviewable = file.name.match(/\.(txt|json|csv|md|log|html|htm|css|js)$/i);
 
   const handleDownload = () => {
     const blob = new Blob(
