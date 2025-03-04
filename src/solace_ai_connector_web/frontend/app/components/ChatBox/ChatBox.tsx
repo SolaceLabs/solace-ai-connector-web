@@ -14,6 +14,8 @@ interface ChatBoxProps {
   isResponding: boolean;
   selectedFiles: File[];
   setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  onPreviewOpen?: () => void;
+  onPreviewClose?: () => void;
 }
 
 export default function ChatBox({
@@ -24,6 +26,8 @@ export default function ChatBox({
   isResponding,
   selectedFiles,
   setSelectedFiles,
+  onPreviewOpen,
+  onPreviewClose,
 }: Readonly<ChatBoxProps>) {
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [previewFile, setPreviewFile] = useState<FileAttachment | null>(null);
@@ -100,10 +104,14 @@ export default function ChatBox({
 
   const handlePreviewFile = (file: FileAttachment) => {
     setPreviewFile(file);
+    // Notify parent that preview is opening
+    if (onPreviewOpen) onPreviewOpen();
   };
 
   const handleClosePreview = () => {
     setPreviewFile(null);
+    // Notify parent that preview is closing
+    if (onPreviewClose) onPreviewClose();
   };
 
   return (
@@ -112,7 +120,7 @@ export default function ChatBox({
       <div
         className={
           previewFile
-            ? "flex-1 pr-[200px] transition-all duration-300"
+            ? "flex-1 pr-[300px] transition-all duration-300"
             : "flex-1"
         }
       >
@@ -134,22 +142,27 @@ export default function ChatBox({
 
       {/* Floating arrow to return to bottom */}
       {userHasScrolled && (
-        <button
-          type="button"
-          onClick={scrollToBottom}
-          className={`
-            fixed z-50 bottom-20 
-            ${previewFile ? 'left-[calc(55%-200px)]' : 'left-1/2'}
-            -translate-x-1/2
-            p-2 rounded-full bg-slate-300 dark:bg-gray-700
-            text-black dark:text-gray-200
-            shadow hover:bg-gray-300 dark:hover:bg-gray-600
-            transition-colors
-          `}
-        >
-          <FiArrowDown className="w-4 h-4" strokeWidth={3} />
-        </button>
-      )}
+  <button
+    type="button"
+    onClick={scrollToBottom}
+    className={`
+      fixed bottom-20
+      left-1/2
+      transform
+      -translate-x-1/2
+      p-2 rounded-full bg-slate-300 dark:bg-gray-700
+      text-black dark:text-gray-200
+      shadow hover:bg-gray-300 dark:hover:bg-gray-600
+      transition-colors
+      ${previewFile 
+        ? 'ml-[-350px]' // When preview is open, adjust to compensate for the shifted input
+        : ''
+      }
+    `}
+  >
+    <FiArrowDown className="w-4 h-4" strokeWidth={3} />
+  </button>
+)}
 
       {/* Input area */}
       <div
@@ -159,10 +172,18 @@ export default function ChatBox({
           bg-white/95 dark:bg-gray-900/95 
           backdrop-blur-sm
           transition-all duration-300
-          ${previewFile ? 'right-[200px]' : 'right-0'}
+          ${previewFile ? 'right-[300px]' : 'right-0'}
         `}
       >
-        <div className="md:w-2/4 w-11/12 mx-auto py-2">
+
+        <div className={`md:w-2/4 w-11/12 mx-auto py-2
+            ${
+              previewFile
+                ? "md:w-[60%] ml-[60px] mr-auto" // SHIFT LEFT & leave space on right
+                : "md:w-2/4 mx-auto" // Center if no preview
+            }
+          `}
+        >
           <ChatInput
             userInput={userInput}
             setUserInput={setUserInput}

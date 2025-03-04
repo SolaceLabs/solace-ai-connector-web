@@ -11,7 +11,7 @@ interface PreviewPanelProps {
 const PreviewPanel: React.FC<PreviewPanelProps> = ({ 
   file, 
   onClose, 
-  initialWidth = 400 
+  initialWidth = 600 
 }) => {
   const [width, setWidth] = useState(initialWidth);
   const [isResizing, setIsResizing] = useState(false);
