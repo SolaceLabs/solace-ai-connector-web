@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface HtmlPreviewPanelProps {
   content: string;
@@ -6,24 +6,16 @@ interface HtmlPreviewPanelProps {
   isMermaid?: boolean;
 }
 
-const HtmlPreviewPanel: React.FC<HtmlPreviewPanelProps> = ({ 
-  content, 
+const HtmlPreviewPanel: React.FC<HtmlPreviewPanelProps> = ({
+  content,
   width,
   isMermaid = false
 }) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  
-  // Re-render when content changes
+  const [srcDoc, setSrcDoc] = useState('');
+
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (iframe) {
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (doc) {
-        doc.open();
-        
-        if (isMermaid) {
-          doc.write(`
-            <!DOCTYPE html>
+    if (isMermaid) {
+      setSrcDoc(`            <!DOCTYPE html>
             <html>
             <head>
               <meta charset="utf-8">
@@ -151,24 +143,26 @@ const HtmlPreviewPanel: React.FC<HtmlPreviewPanelProps> = ({
                 </div>
               </div>
             </body>
-            </html>
-          `);
-        } else {
-            // Regular HTML content
-            doc.write(content);
-          }
-        doc.close();
-      }
+            </html>`);
+    } else {
+      // For regular HTML
+      const wrappedContent = content.replace(
+        /<script>([\s\S]*?)<\/script>/g, 
+        (match, scriptContent) => {
+          return `<script>(function() {\n${scriptContent}\n})();</script>`;
+        }
+      );
+      setSrcDoc(wrappedContent);
     }
   }, [content, isMermaid]);
 
   return (
-    <div 
-      className="bg-white rounded-md overflow-hidden shadow-md" 
+    <div
+      className="bg-white rounded-md overflow-hidden shadow-md"
       style={{ maxWidth: `${width}px`, height: 'calc(100vh - 200px)' }}
     >
       <iframe
-        ref={iframeRef}
+        srcDoc={srcDoc}
         title="HTML Preview"
         sandbox="allow-scripts allow-same-origin"
         className="w-full h-full border-none"

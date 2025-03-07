@@ -2,7 +2,6 @@ import { useAuthCheck } from "../hooks/useAuthCheck";
 import { useChat } from "../hooks/useChat";
 import ChatBox from "./ChatBox/ChatBox";
 import DarkModeToggle from "./DarkModeToggle";
-import { Notifications } from "./Notifications";
 import { Message } from "./ChatBox/ChatBox.types";
 import { useConfig } from "./ConfigProvider";
 import { DragEvent, useState, useRef } from "react";
@@ -47,7 +46,6 @@ export default function ChatContainer() {
     isResponding,
     handleNewSession,
     handleSubmit,
-    notifications,
     darkMode,
     setDarkMode,
   } = useChat({
@@ -194,7 +192,6 @@ export default function ChatContainer() {
           />
         </div>
       </header>
-      <Notifications notifications={notifications} darkMode={darkMode} />
 
       <main className="flex-1 pt-20 bg-white dark:bg-gray-900 min-h-screen">
         <div

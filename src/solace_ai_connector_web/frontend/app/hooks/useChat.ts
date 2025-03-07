@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Message } from "../components/ChatBox/ChatBox.types";
 import { getCookie, getCsrfToken, useConfig } from '../components/ConfigProvider';
+import { StatusMessage } from "../components/StatusLog";
 
 interface UseChatProps {
   serverUrl: string;
@@ -11,6 +12,7 @@ interface StreamState {
   botMessageBuffer: string;
   partialLineBuffer: string;
   hasShownFirstStatus: boolean;
+  firstChunkRead: boolean; 
 }
 
 interface UseChatReturn {
@@ -22,7 +24,7 @@ interface UseChatReturn {
   isResponding: boolean;
   handleNewSession: () => void;
   handleSubmit: (event: React.FormEvent, files?: File[] | null) => Promise<void>;
-  notifications: Array<{ id: string; message: string }>;
+  clearStatusMessages: () => void;
   darkMode: boolean;
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -32,9 +34,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
   const [messages, setMessages] = useState<Message[]>([welcomeMessage]);
   const [userInput, setUserInput] = useState("");
   const [isResponding, setIsResponding] = useState(false);
-  const [notifications, setNotifications] = useState<
-    Array<{ id: string; message: string }>
-  >([]);
+  const [currentStatusMessage, setCurrentStatusMessage] = useState<StatusMessage | null>(null);
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const storedDarkMode = localStorage.getItem('darkMode');
@@ -58,15 +58,6 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
     }
   }, [darkMode]);
 
-  // Helper for notifications
-  const addNotification = useCallback((message: string) => {
-    const id = Date.now().toString();
-    setNotifications((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-    }, 5000);
-  }, []);
-
   const handleNewSession = () => {
     if (currentController) {
       currentController.abort();
@@ -75,8 +66,40 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
 
     setSessionId("");
     setMessages([welcomeMessage]);
+    setCurrentStatusMessage(null);
+
     setIsResponding(false);
   };
+
+  const clearStatusMessages = useCallback(() => {
+    setCurrentStatusMessage(null);
+  }, []);
+
+  function setRespondingMessage() {
+    const statusObj: StatusMessage = {
+      id: Date.now().toString(),
+      message: "📝 Responding...",
+    };
+
+    setCurrentStatusMessage(statusObj);
+
+    setMessages((prev) => {
+      const lastMessage = prev[prev.length - 1];
+      if (lastMessage.isStatusMessage && lastMessage.isThinkingMessage) {
+        return [
+          ...prev.slice(0, -1),
+          {
+            ...lastMessage,
+            text: `${configBotName} is responding`,
+            statusMessage: statusObj,
+            isThinkingMessage: false,
+          },
+        ];
+      }
+      return prev;
+    });
+  }
+  
 
   const handleSubmit = async (
     event: React.FormEvent,
@@ -100,6 +123,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
       botMessageBuffer: "",
       partialLineBuffer: "",
       hasShownFirstStatus: false,
+      firstChunkRead: false, 
     };
     setUserInput("");
   
@@ -117,7 +141,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
         if (handleInvalidResponse(response)) return;
         throw new Error("Network response was not ok");
       }
-  
+      
       const reader = response.body?.getReader();
       if (!reader) return;
       const decoder = new TextDecoder();
@@ -139,6 +163,69 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
       cleanupRequest();
     }
   };
+  function updateStatusMessage(
+    parsedData: any,
+    botBuffer: string,
+    shownFirst: boolean
+  ): boolean {
+    if (!parsedData.status_message) {
+      return shownFirst;
+    }
+  
+    const statusObj: StatusMessage = {
+      id: Date.now().toString(),
+      message: parsedData.status_message,
+    };
+    setCurrentStatusMessage(statusObj);
+  
+    // If it’s the *first* status and the bot text is still empty
+    //    => just override the last bubble if we already have a "responding..."
+    if (botBuffer === "" && !shownFirst) {
+      setMessages((prev) => {
+        const newList = [...prev];
+        const lastMsg = newList[newList.length - 1];
+  
+        // If the last message is a status bubble (thinking/responding),
+        // just update its text and statusMessage
+        if (lastMsg && lastMsg.isStatusMessage) {
+          newList[newList.length - 1] = {
+            ...lastMsg,
+            text: `${configBotName} is thinking`,
+            statusMessage: statusObj,
+            isThinkingMessage: false,
+          };
+        } else {
+          // If we don't have a bubble to override, create a new one
+          newList.push({
+            text:  `${configBotName} is thinking`,
+            isUser: false,
+            isStatusMessage: true,
+            isThinkingMessage: false,
+            statusMessage: statusObj,
+          });
+        }
+        return newList;
+      });
+  
+      return true;
+    }
+  
+    setMessages((prev) => {
+      const newList = [...prev];
+      const lastMsg = newList[newList.length - 1];
+  
+      if (lastMsg && !lastMsg.isUser) {
+        newList[newList.length - 1] = {
+          ...lastMsg,
+          statusMessage: statusObj,
+        };
+      }
+      return newList;
+    });
+  
+    return shownFirst;
+  }
+  
 
   // Aborts the previous request if an AbortController is provided
   function abortPreviousRequest(controller: AbortController | null) {
@@ -156,6 +243,14 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
+
+    // As soon as we see the first chunk, switch from "thinking..." to "responding..."
+    if (!state.firstChunkRead) {
+      state.firstChunkRead = true;
+      if (!state.hasShownFirstStatus) {
+        setRespondingMessage(); 
+      }
+    }
   
       const chunk = decoder.decode(value, { stream: true });
       const combined = state.partialLineBuffer + chunk;
@@ -241,32 +336,6 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
     return botBuffer;
   }
   
-  // Updates the status message based on the parsed data and current bot message buffer, managing first-time display.
-  function updateStatusMessage(
-    parsedData: any,
-    botBuffer: string,
-    shownFirst: boolean
-  ): boolean {
-    if (parsedData.status_message) {
-      if (botBuffer !== "") {
-        addNotification(parsedData.status_message);
-      } else if (!shownFirst) {
-        setMessages((prev) => [
-          ...prev.filter((msg) => !msg.isThinkingMessage),
-          {
-            text: parsedData.status_message,
-            isUser: false,
-            isStatusMessage: true,
-          },
-        ]);
-        return true;
-      } else {
-        addNotification(parsedData.status_message);
-      }
-    }
-    return shownFirst;
-  }
-
   // Appends new content from the parsed data to the bot's message buffer and updates the displayed message.
   function updateContent(parsedData: any, botBuffer: string): string {
     if (parsedData.content) {
@@ -333,6 +402,28 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
 
   // Cleans up after a chat request is complete.
   function cleanupRequest() {
+    // Set a completion status
+    const completionStatus: StatusMessage = {
+      id: Date.now().toString(),
+      message: "✅ Response complete",
+    };
+    setCurrentStatusMessage(completionStatus);
+    
+    // Update the message with the completion status
+    setMessages((prev) => {
+      const lastMessage = prev[prev.length - 1];
+      if (!lastMessage.isUser) {
+        return [
+          ...prev.slice(0, -1),
+          {
+            ...lastMessage,
+            statusMessage: completionStatus,
+          },
+        ];
+      }
+      return prev;
+    });
+    
     setCurrentController(null);
     setIsResponding(false);
   }
@@ -376,6 +467,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
         isUser: false,
         isStatusMessage: true,
         isThinkingMessage: true,
+        statusMessage: {id: Date.now().toString(), message: "🤔 Thinking..."},
       },
     ]);
   }
@@ -396,7 +488,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
     });
   }
   
-  // Updates the bot's message text with new content and metadata.
+  // Update the bot message updater to include status messages
   function updateBotMessageWithText(
     botBuffer: string,
     currentMessageId: string,
@@ -411,20 +503,26 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
           sessionId: parsedData.session_id || sessionId,
           messageId: currentMessageId,
         },
+        statusMessage: currentStatusMessage,
       };
       if (lastMessage && !lastMessage.isUser) {
-        // Merge the old message + new fields, remove "thinking" and "status"
         return [
           ...prev.slice(0, -1),
           {
             ...lastMessage,
             ...updatedFields,
+            // Add status message if it doesn't exist
+            statusMessage: lastMessage.statusMessage || currentStatusMessage,
             isStatusMessage: false,
             isThinkingMessage: false,
           },
         ];
       } else {
-        return [...prev, updatedFields];
+        return [...prev, {
+          ...updatedFields,
+          // Add status message to new bot messages too
+          statusMessage: currentStatusMessage,
+        }];
       }
     });
   }
@@ -438,7 +536,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
     isResponding,
     handleNewSession,
     handleSubmit,
-    notifications,
+    clearStatusMessages,
     darkMode,
     setDarkMode,
   };
