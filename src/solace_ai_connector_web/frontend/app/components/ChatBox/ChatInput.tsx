@@ -11,7 +11,7 @@ interface ChatInputProps {
   setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
-export default function ChatInput({
+export function ChatInput({
   userInput,
   setUserInput,
   handleSubmit,
@@ -43,6 +43,10 @@ export default function ChatInput({
 
   const handleRemoveFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const onSubmit = (e: FormEvent) => {

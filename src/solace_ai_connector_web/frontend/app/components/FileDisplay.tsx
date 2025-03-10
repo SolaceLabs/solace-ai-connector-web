@@ -1,4 +1,5 @@
 import { PreviewContent } from "./PreviewFileContent/PreviewContent";
+import { isHtmlFile, isMermaidFile } from "./PreviewFileContent/PreviewHelpers";
 
 export interface FileAttachment {
   name: string;
@@ -8,13 +9,18 @@ export interface FileAttachment {
 
 interface FileDisplayProps {
   file: FileAttachment;
+  onPreview?: (file: FileAttachment) => void;
+  onRun?: (file: FileAttachment) => void;
 }
 
-const FileDisplay: React.FC<FileDisplayProps> = ({ file }) => {
+const FileDisplay: React.FC<FileDisplayProps> = ({ file, onPreview, onRun }) => {
   const isImage = file.mime_type?.startsWith("image/");
   const isTextBased =
     file.mime_type?.startsWith("text/") ||
-    file.name.match(/\.(txt|json|csv|md|log)$/i);
+    file.name.match(/\.(txt|json|csv|md|log|html|htm|css|js|mmd|mermaid)$/i);
+  
+  // Check if this file type is renderable
+  const isRenderable = isHtmlFile(file.name) || isMermaidFile(file.name);
 
   const handleDownload = () => {
     const blob = new Blob(
@@ -40,29 +46,52 @@ const FileDisplay: React.FC<FileDisplayProps> = ({ file }) => {
           className="w-full h-auto object-contain rounded-lg shadow-md"
         />
         <div className="mt-2">
-          <FileRow filename={file.name} onDownload={handleDownload} />
+          <FileRow 
+            filename={file.name} 
+            onDownload={handleDownload}
+            onPreview={onPreview ? () => onPreview(file) : undefined}
+            onRun={isRenderable && onRun ? () => onRun(file) : undefined}
+          />
         </div>
       </div>
     );
   }
+
   if (isTextBased) {
     return (
       <div className="w-full max-w-[80vw] md:max-w-md ">
-        <PreviewContent file={file} onDownload={handleDownload} />
+        <PreviewContent 
+          file={file} 
+          onDownload={handleDownload}
+          onPreview={onPreview ? () => onPreview(file) : undefined}
+          onRun={isRenderable && onRun ? () => onRun(file) : undefined}
+        />
       </div>
     );
   }
 
   return (
     <div className="w-full max-w-[80vw] md:max-w-md">
-      <FileRow filename={file.name} onDownload={handleDownload} />
+      <FileRow 
+        filename={file.name} 
+        onDownload={handleDownload}
+        onPreview={onPreview ? () => onPreview(file) : undefined}
+        onRun={isRenderable && onRun ? () => onRun(file) : undefined}
+      />
     </div>
   );
 };
 
-export const FileRow: React.FC<{ filename: string; onDownload?: () => void }> = ({
+export const FileRow: React.FC<{ 
+  filename: string; 
+  onDownload?: () => void;
+  onPreview?: () => void;
+  onRun?: () => void;
+}> = ({
   filename,
   onDownload,
+  onPreview,
+  onRun,
 }) => (
   <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1.5 md:p-2 w-full max-w-[85vw] md:max-w-md">
     <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
@@ -86,14 +115,35 @@ export const FileRow: React.FC<{ filename: string; onDownload?: () => void }> = 
         {filename}
       </span>
     </div>
-    {onDownload && (
-      <button
-        onClick={onDownload}
-        className="flex-shrink-0 bg-solace-blue dark:bg-solace-green text-white px-2 md:px-3 py-1 rounded text-xs md:text-sm hover:opacity-80 transition-opacity"
-      >
-        Download
-      </button>
-    )}
+    <div className="flex items-center gap-1.5">
+      {/* Run button */}
+      {onRun && (
+        <button
+          onClick={onRun}
+          className="flex-shrink-0 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 md:px-3 py-1 rounded text-xs md:text-sm hover:opacity-80 transition-opacity"
+        >
+          Run
+        </button>
+      )}
+      
+      {onPreview && (
+        <button
+          onClick={onPreview}
+          className="flex-shrink-0 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 md:px-3 py-1 rounded text-xs md:text-sm hover:opacity-80 transition-opacity"
+        >
+          Preview
+        </button>
+      )}
+      
+      {onDownload && (
+        <button
+          onClick={onDownload}
+          className="flex-shrink-0 bg-solace-blue dark:bg-solace-green text-white px-2 md:px-3 py-1 rounded text-xs md:text-sm hover:opacity-80 transition-opacity"
+        >
+          Download
+        </button>
+      )}
+    </div>
   </div>
 );
 
