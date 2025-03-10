@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { FiArrowDown } from "react-icons/fi";
-import ChatMessages from "./ChatMessages";
-import ChatInput from "./ChatInput";
+import {ChatMessages} from "./ChatMessages";
+import {ChatInput} from "./ChatInput";
 import { Message } from "./ChatBox.types";
 import { FileAttachment } from "../FileDisplay";
-import PreviewPanel from "../PreviewFileContent/PreviewPanel";
+import {PreviewPanel} from "../PreviewFileContent/PreviewPanel";
 
 interface ChatBoxProps {
   messages: Message[];

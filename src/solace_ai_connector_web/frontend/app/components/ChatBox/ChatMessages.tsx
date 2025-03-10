@@ -1,4 +1,3 @@
-// Update ChatMessages.tsx
 import { useRef, useMemo } from "react";
 import { Message } from "./ChatBox.types";
 import MessageBubble from "./MessageBubble";
@@ -12,7 +11,7 @@ interface ChatMessagesProps {
   onRunFile?: (file: FileAttachment) => void;
 }
 
-export default function ChatMessages({ 
+export function ChatMessages({ 
   messages, 
   scrollToBottom,
   messagesEndRef,

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FileAttachment } from '../FileDisplay';
 import { isHtmlFile, isMermaidFile, isCsvFile } from './PreviewHelpers';
 import { CsvPreviewPanel } from './CsvPreviewPanel';
-import ContentRenderer from './ContentRenderer';
+import {ContentRenderer} from './ContentRenderer';
 
 interface PreviewPanelProps {
   file: FileAttachment;
@@ -11,7 +11,7 @@ interface PreviewPanelProps {
   autoRun?: boolean;
 }
 
-const PreviewPanel: React.FC<PreviewPanelProps> = ({ 
+export const PreviewPanel: React.FC<PreviewPanelProps> = ({ 
   file, 
   onClose, 
   initialWidth = window.innerWidth * 0.4,
@@ -218,5 +218,3 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
     </div>
   );
 };
-
-export default PreviewPanel;

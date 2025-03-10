@@ -1,6 +1,6 @@
 import React from 'react';
-import HtmlRenderer from './Renderers/HTMLRenderer';
-import MermaidRenderer from './Renderers/MermaidRenderer';
+import {HtmlRenderer} from './Renderers/HTMLRenderer';
+import {MermaidRenderer} from './Renderers/MermaidRenderer';
 
 export type RendererType = 'html' | 'mermaid';
 
@@ -10,7 +10,7 @@ interface ContentRendererProps {
   rendererType: RendererType;
 }
 
-const ContentRenderer: React.FC<ContentRendererProps> = ({
+export const ContentRenderer: React.FC<ContentRendererProps> = ({
   content,
   width,
   rendererType,
@@ -25,5 +25,3 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({
       return <div>Unsupported content type</div>;
   }
 };
-
-export default ContentRenderer;

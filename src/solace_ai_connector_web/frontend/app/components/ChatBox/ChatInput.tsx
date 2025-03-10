@@ -11,7 +11,7 @@ interface ChatInputProps {
   setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
-export default function ChatInput({
+export function ChatInput({
   userInput,
   setUserInput,
   handleSubmit,

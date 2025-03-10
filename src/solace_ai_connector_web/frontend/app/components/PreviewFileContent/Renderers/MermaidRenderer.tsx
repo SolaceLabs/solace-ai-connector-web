@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BaseRendererProps } from './types';
 
-const MermaidRenderer: React.FC<BaseRendererProps> = ({ content, width }) => {
+export const MermaidRenderer: React.FC<BaseRendererProps> = ({ content, width }) => {
   const [srcDoc, setSrcDoc] = useState('');
 
   useEffect(() => {
@@ -168,5 +168,3 @@ const MermaidRenderer: React.FC<BaseRendererProps> = ({ content, width }) => {
     </div>
   );
 };
-
-export default MermaidRenderer;
