@@ -150,26 +150,34 @@ export default function ChatBox({
       )}
       {/* Floating arrow to return to bottom */}
       {userHasScrolled && (
-        <button
-          type="button"
-          onClick={scrollToBottom}
+        <div 
           className={`
-            fixed bottom-20
-            left-1/2
-            transform
-            -translate-x-1/2
-            p-2 rounded-full bg-slate-300 dark:bg-gray-700
-            text-black dark:text-gray-200
-            shadow hover:bg-gray-300 dark:hover:bg-gray-600
-            transition-colors
-            ${previewFile 
-              ? 'ml-[-350px]' // When preview is open, adjust to compensate for the shifted input
-              : ''
-            }
+            fixed bottom-20 left-0 
+            z-20 
+            transition-all duration-300
+            ${previewFile ? 'right-[300px]' : 'right-0'}
           `}
         >
-          <FiArrowDown className="w-4 h-4" strokeWidth={3} />
-        </button>
+          <div 
+            className={`
+              flex justify-center
+              ${
+                previewFile
+                  ? "md:w-[60%] ml-[60px] mr-[60px]"
+                  : "md:w-2/4 w-11/12 mx-auto"
+              }
+            `}
+          >
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              className="p-2 rounded-full bg-slate-300 dark:bg-gray-700 text-black dark:text-gray-200 
+                      shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              <FiArrowDown className="w-4 h-4" strokeWidth={3} />
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Input area */}
@@ -183,12 +191,11 @@ export default function ChatBox({
           ${previewFile ? 'right-[300px]' : 'right-0'}
         `}
       >
-
-        <div className={`md:w-2/4 w-11/12 mx-auto py-2
+        <div className={`py-2
             ${
               previewFile
-                ? "md:w-[60%] ml-[60px] mr-auto" // SHIFT LEFT & leave space on right
-                : "md:w-2/4 mx-auto" // Center if no preview
+                ? "md:w-[60%] ml-[60px] mr-[60px]"
+                : "md:w-2/4 w-11/12 mx-auto"
             }
           `}
         >
