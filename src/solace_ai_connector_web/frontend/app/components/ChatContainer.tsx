@@ -198,8 +198,8 @@ export default function ChatContainer() {
           className={`pb-16 w-11/12 transition-all duration-300
             ${
               isPreviewOpen
-                ? "md:w-[60%] ml-[100px] mr-auto" // SHIFT LEFT & leave space on right
-                : "md:w-2/4 mx-auto" // Center if no preview
+                ? "md:w-[60%] ml-[100px] mr-auto"
+                : "md:w-2/4 mx-auto"
             }
           `}
         >

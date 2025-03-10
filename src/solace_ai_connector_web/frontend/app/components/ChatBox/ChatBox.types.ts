@@ -13,7 +13,7 @@ export interface FileAttachment {
     isStatusMessage?: boolean;
     isThinkingMessage?: boolean;
     files?: FileAttachment[];
-    statusMessage?: StatusMessage| null;
+    statusMessage?: StatusMessage | null;
     uploadedFiles?: File[];
     metadata?: {
       messageId?: string;

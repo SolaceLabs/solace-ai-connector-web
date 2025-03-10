@@ -143,7 +143,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
                                     />
                                 </svg>
                             </button>
-                            
+
                             {/* Copy button */}
                             <button
                                 onClick={handleCopy}
@@ -184,7 +184,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
                             </button>
                         </div>
                     </div>
-                    
+
                     {/* Content container */}
                     <div className={`p-3 scrollbar-themed ${
                         isExpanded ? 'overflow-auto max-h-[500px]' : 'overflow-hidden'
@@ -203,7 +203,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
                         )}
                     </div>
                 </div>
-    
+
                 {/* Show more/less button */}
                 {((!isCsv && decodedContent.split('\n').length > 5) || 
                   (isCsv && decodedContent.split('\n').length > 4)) && (

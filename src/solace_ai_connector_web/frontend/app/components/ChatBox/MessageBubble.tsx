@@ -74,7 +74,7 @@ function MessageBubble({
     }
     return <CustomMarkdown>{msg.text}</CustomMarkdown>;
   };
-  
+
   return (
     <div className={`my-4 flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
       <div className="relative">

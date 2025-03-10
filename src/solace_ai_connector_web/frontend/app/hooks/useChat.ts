@@ -1,7 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { Message } from "../components/ChatBox/ChatBox.types";
 import { getCookie, getCsrfToken, useConfig } from '../components/ConfigProvider';
-import { StatusMessage } from "../components/StatusLog";
+
+export interface StatusMessage {
+  id: string;
+  message: string;
+}
 
 interface UseChatProps {
   serverUrl: string;
@@ -141,7 +145,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
         if (handleInvalidResponse(response)) return;
         throw new Error("Network response was not ok");
       }
-      
+
       const reader = response.body?.getReader();
       if (!reader) return;
       const decoder = new TextDecoder();
