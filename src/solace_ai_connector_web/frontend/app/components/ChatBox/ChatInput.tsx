@@ -43,6 +43,10 @@ export function ChatInput({
 
   const handleRemoveFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const onSubmit = (e: FormEvent) => {
