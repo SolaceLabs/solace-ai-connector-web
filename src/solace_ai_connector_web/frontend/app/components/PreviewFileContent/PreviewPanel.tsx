@@ -59,11 +59,13 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
 
   const handleDownloadMermaid = () => {
     const iframe = panelRef.current?.querySelector('iframe');
-    if (iframe && iframe.contentWindow) {
+    if (iframe?.contentWindow) {
+      const targetOrigin = window.location.origin;
+      
       iframe.contentWindow.postMessage({
         action: 'getMermaidSvg',
         filename: `${file.name.replace(/\.[^/.]+$/, '')}.svg`
-      }, '*');
+      }, targetOrigin);
     }
   };
   

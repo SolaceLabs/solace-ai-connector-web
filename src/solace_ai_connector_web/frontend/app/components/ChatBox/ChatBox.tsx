@@ -115,12 +115,27 @@ export default function ChatBox({
     handlePreviewFile(file, true);
   }, [handlePreviewFile]);
 
-  const handleClosePreview = () => {
+  useEffect(() => {
+    // Listen for new session events and close the preview panel
+    const handleNewSession = () => {
+      if (previewFile) {
+        handleClosePreview();
+      }
+    };
+    
+    window.addEventListener('new-chat-session', handleNewSession);
+    
+    return () => {
+      window.removeEventListener('new-chat-session', handleNewSession);
+    };
+  }, [previewFile]);
+  
+  const handleClosePreview = useCallback(() => {
     setPreviewFile(null);
     setShouldAutoRun(false);
     // Notify parent that preview is closing
     if (onPreviewClose) onPreviewClose();
-  };
+  }, [onPreviewClose]);
 
   return (
     <div className="flex flex-col h-full relative">

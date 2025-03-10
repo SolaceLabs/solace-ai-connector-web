@@ -62,18 +62,22 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
     }
   }, [darkMode]);
 
-  const handleNewSession = () => {
-    if (currentController) {
-      currentController.abort();
-      setCurrentController(null);
-    }
-
-    setSessionId("");
-    setMessages([welcomeMessage]);
-    setCurrentStatusMessage(null);
-
-    setIsResponding(false);
-  };
+const handleNewSession = useCallback(() => {
+  if (currentController) {
+    currentController.abort();
+    setCurrentController(null);
+  }
+  setSessionId("");
+  setMessages([welcomeMessage]);
+  setCurrentStatusMessage(null);
+  setIsResponding(false);
+  
+  // Dispatch a custom event to notify components about new session
+  if (typeof window !== 'undefined') {
+    const newSessionEvent = new CustomEvent('new-chat-session');
+    window.dispatchEvent(newSessionEvent);
+  }
+}, [currentController, welcomeMessage]);
 
   const clearStatusMessages = useCallback(() => {
     setCurrentStatusMessage(null);
@@ -191,7 +195,7 @@ export function useChat({ serverUrl, welcomeMessage }: UseChatProps): UseChatRet
   
         // If the last message is a status bubble (thinking/responding),
         // just update its text and statusMessage
-        if (lastMsg && lastMsg.isStatusMessage) {
+        if (lastMsg?.isStatusMessage) {
           newList[newList.length - 1] = {
             ...lastMsg,
             text: `${configBotName} is thinking`,
