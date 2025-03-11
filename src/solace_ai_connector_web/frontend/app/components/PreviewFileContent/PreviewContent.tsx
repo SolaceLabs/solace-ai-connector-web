@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { FileAttachment } from '../FileDisplay';
 import { CsvPreviewMessage } from "./CsvPreviewMessage";
-import { isCsvFile, isHtmlFile, isMermaidFile } from './PreviewHelpers';
+import { isCsvFile, isHtmlFile, isMermaidFile, decodeBase64Content } from './PreviewHelpers';
 
 interface PreviewContentProps {
     file: FileAttachment;
@@ -21,13 +21,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
     
-    const decodedContent = useMemo(() => {
-        try {
-            return atob(file.content);
-        } catch (e) {
-            return 'Unable to decode file content';
-        }
-    }, [file.content]);
+    const decodedContent = decodeBase64Content(file.content);
     
     const isCsv = isCsvFile(file.name);
     // Check if this file type is renderable (HTML or Mermaid)

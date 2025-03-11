@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FileAttachment } from '../FileDisplay';
-import { isHtmlFile, isMermaidFile, isCsvFile } from './PreviewHelpers';
+import { isHtmlFile, isMermaidFile, isCsvFile, decodeBase64Content } from './PreviewHelpers';
 import { CsvPreviewPanel } from './CsvPreviewPanel';
 import {ContentRenderer} from './ContentRenderer';
 
@@ -23,7 +23,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
   const panelRef = useRef<HTMLDivElement>(null);
   
   // Decode base64 content
-  const decodedContent = atob(file.content);
+  const decodedContent = decodeBase64Content(file.content);
   
   // Check if content is CSV or HTML
   const isCsvContent = isCsvFile(file.name);
