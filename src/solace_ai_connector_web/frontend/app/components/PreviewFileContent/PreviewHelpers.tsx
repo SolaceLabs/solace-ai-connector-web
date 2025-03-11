@@ -18,3 +18,13 @@ export function isCsvFile(fileName: string): boolean {
     }
     return false;
   }
+
+export function decodeBase64Content(content: string): string {
+    try {
+        return new TextDecoder().decode(
+            Uint8Array.from(atob(content), (c) => c.charCodeAt(0))
+        );
+    } catch (error) {
+        return atob(content);
+    }
+}
