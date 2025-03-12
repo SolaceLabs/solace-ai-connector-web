@@ -1,4 +1,5 @@
 import { PreviewContent } from "./PreviewFileContent/PreviewContent";
+import { isHtmlFile, isMermaidFile } from "./PreviewFileContent/PreviewHelpers";
 
 export interface FileAttachment {
   name: string;
@@ -8,13 +9,18 @@ export interface FileAttachment {
 
 interface FileDisplayProps {
   file: FileAttachment;
+  onPreview?: (file: FileAttachment) => void;
+  onRun?: (file: FileAttachment) => void;
 }
 
-const FileDisplay: React.FC<FileDisplayProps> = ({ file }) => {
+const FileDisplay: React.FC<FileDisplayProps> = ({ file, onPreview, onRun }) => {
   const isImage = file.mime_type?.startsWith("image/");
   const isTextBased =
     file.mime_type?.startsWith("text/") ||
-    file.name.match(/\.(txt|json|csv|md|log)$/i);
+    file.name.match(/\.(txt|json|csv|md|log|html|htm|css|js|mmd|mermaid)$/i);
+  
+  // Check if this file type is renderable
+  const isRenderable = isHtmlFile(file.name) || isMermaidFile(file.name);
 
   const handleDownload = () => {
     const blob = new Blob(
@@ -45,10 +51,16 @@ const FileDisplay: React.FC<FileDisplayProps> = ({ file }) => {
       </div>
     );
   }
+
   if (isTextBased) {
     return (
       <div className="w-full max-w-[80vw] md:max-w-md ">
-        <PreviewContent file={file} onDownload={handleDownload} />
+        <PreviewContent 
+          file={file} 
+          onDownload={handleDownload}
+          onPreview={onPreview ? () => onPreview(file) : undefined}
+          onRun={isRenderable && onRun ? () => onRun(file) : undefined}
+        />
       </div>
     );
   }

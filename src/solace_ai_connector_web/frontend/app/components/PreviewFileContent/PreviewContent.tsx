@@ -1,36 +1,38 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { FileAttachment } from '../FileDisplay';
-import {CsvPreview} from "./CsvPreview"
+import { CsvPreviewMessage } from "./CsvPreviewMessage";
+import { isCsvFile, isHtmlFile, isMermaidFile, decodeBase64Content } from './PreviewHelpers';
 
 interface PreviewContentProps {
     file: FileAttachment;
     className?: string;
     onDownload: () => void;
+    onPreview?: () => void;
+    onRun?: () => void;
 }
 
-export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className, onDownload }) => {
+export const PreviewContent: React.FC<PreviewContentProps> = ({ 
+    file, 
+    className, 
+    onDownload, 
+    onPreview,
+    onRun
+}) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
     
-    const decodedContent = useMemo(() => {
-        try {
-            return atob(file.content);
-        } catch (e) {
-            return 'Unable to decode file content';
-        }
-    }, [file.content]);
-
-    const isCsv = file.name.toLowerCase().endsWith('.csv');
-
+    const decodedContent = decodeBase64Content(file.content);
+    
+    const isCsv = isCsvFile(file.name);
+    // Check if this file type is renderable (HTML or Mermaid)
+    const isRenderable = isHtmlFile(file.name) || isMermaidFile(file.name);
+    
     const handleCopy = () => {
         navigator.clipboard.writeText(decodedContent);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 1000);
     };
-    const handleDownload = () => {
-        onDownload();
-    };
-
+    
     return (
         <div className={`mt-2 w-full max-w-sm md:max-w-md ${className}`}>
             <div className="relative">
@@ -58,9 +60,66 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className,
                         
                         {/* Action buttons */}
                         <div className="flex items-center gap-2">
+                            {/* Run button (if renderable) */}
+                            {isRenderable && onRun && (
+                                <button
+                                    onClick={onRun}
+                                    className="p-1.5 rounded bg-green-200 dark:bg-green-700 hover:bg-green-300 dark:hover:bg-green-600 transition-colors"
+                                    title="Run code"
+                                >
+                                    <svg 
+                                        className="w-4 h-4 text-green-800 dark:text-green-300" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        strokeWidth={2}
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+                                        />
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            d="M10 8l6 4-6 4V8z"
+                                        />
+                                    </svg>
+                                </button>
+                            )}    
+                            {/* Preview button (if applicable) */}
+                            {onPreview && (
+                                <button
+                                    onClick={onPreview}
+                                    className="p-1.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                    title="Preview file"
+                                >
+                                    <svg 
+                                        className="w-4 h-4 text-gray-600 dark:text-gray-300" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
+                                    </svg>
+                                </button>
+                            )}
+                            
                             {/* Download button */}
                             <button
-                                onClick={handleDownload}
+                                onClick={onDownload}
                                 className="p-1.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                                 title="Download file"
                             >
@@ -125,7 +184,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className,
                         isExpanded ? 'overflow-auto max-h-[500px]' : 'overflow-hidden'
                     }`}>
                         {isCsv ? (
-                            <CsvPreview content={decodedContent} isExpanded={isExpanded} />
+                            <CsvPreviewMessage content={decodedContent} isExpanded={isExpanded} />
                         ) : (
                             <pre className="font-mono text-xs md:text-sm text-gray-800 dark:text-gray-200">
                                 <code>
@@ -138,7 +197,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({ file, className,
                         )}
                     </div>
                 </div>
-    
+
                 {/* Show more/less button */}
                 {((!isCsv && decodedContent.split('\n').length > 5) || 
                   (isCsv && decodedContent.split('\n').length > 4)) && (
