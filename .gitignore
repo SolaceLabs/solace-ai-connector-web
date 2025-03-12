@@ -12,4 +12,5 @@ src/solace_ai_connector_web/__pycache__
 __pycache__
 
 src/solace_ai_connector_web/frontend/static
-src/solace_ai_connector_web/frontend/static/client
+src/solace_ai_connector_web/frontend/static/client/*
+src/solace_ai_connector_web/frontend/static/client/assets/*
