@@ -212,7 +212,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
             rendererType={isMermaidContent ? 'mermaid' : 'html'}
           />
         ) : (
-          <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+          <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
             {decodedContent}
           </pre>
         )}
