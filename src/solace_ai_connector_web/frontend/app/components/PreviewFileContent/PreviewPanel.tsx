@@ -203,19 +203,27 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       
       {/* Content section*/}
       <div className="flex-1 pt-4 px-4 pb-8 overflow-auto">
-        {isCsvContent ? (
-          <CsvPreviewPanel content={decodedContent} width={width - 32} />
-        ) : (isHtmlContent || isMermaidContent) && isRendering ? (
-          <ContentRenderer 
-            content={decodedContent} 
-            width={width - 32}
-            rendererType={isMermaidContent ? 'mermaid' : 'html'}
-          />
-        ) : (
-          <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-            {decodedContent}
-          </pre>
-        )}
+        {(() => {
+          if (isCsvContent) {
+            return <CsvPreviewPanel content={decodedContent} width={width - 32} />;
+          }
+          
+          if ((isHtmlContent || isMermaidContent) && isRendering) {
+            return (
+              <ContentRenderer 
+                content={decodedContent} 
+                width={width - 32}
+                rendererType={isMermaidContent ? 'mermaid' : 'html'}
+              />
+            );
+          }
+          
+          return (
+            <pre className="text-xs md:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
+              {decodedContent}
+            </pre>
+          );
+        })()}
       </div>
     </div>
   );
