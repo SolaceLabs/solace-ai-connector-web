@@ -3,6 +3,7 @@ from flask import Flask, make_response, jsonify
 from flask_cors import CORS
 from solace_ai_connector.components.component_base import ComponentBase
 from flask_wtf import CSRFProtect
+from waitress import serve
 import os
 
 info = {
@@ -239,7 +240,7 @@ class RestBase(ComponentBase):
         if self.enabled == False:
             return
 
-        self.app.run(host=self.host, port=self.listen_port)
+        serve(self.app, host=self.host, port=self.listen_port)
 
     def stop_component(self):
         func = self.app.config.get("werkzeug.server.shutdown")
