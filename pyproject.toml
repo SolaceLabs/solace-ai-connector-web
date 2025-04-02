@@ -12,6 +12,7 @@ license = { file = "LICENSE" }
 readme = "README.md"
 classifiers = [
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
@@ -19,7 +20,7 @@ classifiers = [
 ]
 
 description = "Web interface for Solace Agent Mesh"
-requires-python = ">=3.11"
+requires-python = ">=3.10.16"
 dependencies = [
     "flask~=3.0.3",
     "requests~=2.32.3",
@@ -61,7 +62,7 @@ installer = "pip"
 
 # Specify minimum and maximum Python versions to test
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.11", "3.12"]
+python = ["3.10", "3.12"]
 
 
 [tool.ruff]
