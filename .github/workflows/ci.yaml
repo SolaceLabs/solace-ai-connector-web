@@ -7,10 +7,12 @@ on:
     types: [opened, synchronize]
 
 permissions:
+  repository-projects: read
+  contents: write
   id-token: write
+  packages: write
   checks: write
   pull-requests: write
-  contents: write
 
 jobs:
   ci:
@@ -19,6 +21,9 @@ jobs:
       min-python-version: "3.10"
       whitesource_product_name: "solace-ai-connector-web"
       whitesource_config_file: "wss-unified-agent.config"
+      npm_package_path: src/solace_ai_connector_web/frontend
+      node_version: 20
+      npm_lock_file: package-lock.json
     secrets:
       SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
