@@ -2,4 +2,4 @@ flask==2.2.5
 requests==2.31.0
 flask-cors==3.0.10
 python-dotenv
-waitress>=3.0.2
+gevent>=24.11.1
