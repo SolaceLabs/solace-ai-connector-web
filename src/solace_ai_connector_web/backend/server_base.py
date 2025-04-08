@@ -244,10 +244,8 @@ class RestBase(ComponentBase):
         http_server.serve_forever()
 
     def stop_component(self):
-        func = self.app.config.get("werkzeug.server.shutdown")
-        if func is None:
-            raise RuntimeError("Not running with the Werkzeug Server")
-        func()
+        if hasattr(self, 'http_server'):
+            self.http_server.stop(timeout=10)
 
     @abstractmethod
     def register_routes(self):
