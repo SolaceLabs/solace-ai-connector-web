@@ -4,6 +4,7 @@ from flask_cors import CORS
 from solace_ai_connector.components.component_base import ComponentBase
 from flask_wtf import CSRFProtect
 from gevent.pywsgi import WSGIServer
+from urllib.parse import urlparse
 import os
 
 info = {
@@ -217,13 +218,24 @@ class RestBase(ComponentBase):
         self.app.config['SECRET_KEY'] = self.csrf_key
         csrf.init_app(self.app)
         
+        frontend_origins = [self.frontend_url]
+    
+        # if frontend_url is using localhost or 127.0.0.1, then add them both to cors origins
+        if "localhost" in self.frontend_url or "127.0.0.1" in self.frontend_url:
+            parsed_url = urlparse(self.frontend_url)
+            scheme = parsed_url.scheme
+            port = f":{parsed_url.port}" if parsed_url.port else ""
+            
+            if "localhost" in self.frontend_url:
+                frontend_origins.append(f"{scheme}://127.0.0.1{port}")
+            else:
+                frontend_origins.append(f"{scheme}://localhost{port}")
+        
         CORS(
             self.app,
             resources={
                 r"/*": {
-                    "origins": [
-                        self.frontend_url,
-                    ],
+                    "origins": frontend_origins,
                     "supports_credentials": True
                 },
             },

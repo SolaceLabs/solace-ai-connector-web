@@ -46,7 +46,7 @@ Run this in the root of the project to build the wheel package:
 python -m build -w
 ```
 
-This will create a /dist folder containing the wheel file which needs to be installed as a dependency in the solace-agent-mesh project.
+This will create a `/dist` folder containing the wheel file which needs to be installed as a dependency in the solace-agent-mesh project.
 
 One suggested workflow for installing the wheel:
 
