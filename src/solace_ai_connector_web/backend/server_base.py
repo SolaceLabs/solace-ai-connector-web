@@ -260,7 +260,7 @@ class RestBase(ComponentBase):
             try:
                 self.http_server.stop(timeout=10)
             except Exception as e:
-                print("Error stopping WebSocket server: %s", str(e))
+                print("Error stopping Web UI server: %s", str(e))
 
     @abstractmethod
     def register_routes(self):
