@@ -3,6 +3,7 @@ from flask import Flask, make_response, jsonify
 from flask_cors import CORS
 from solace_ai_connector.components.component_base import ComponentBase
 from flask_wtf import CSRFProtect
+from gevent.pywsgi import WSGIServer
 from urllib.parse import urlparse
 import os
 
@@ -251,13 +252,15 @@ class RestBase(ComponentBase):
         if self.enabled == False:
             return
 
-        self.app.run(host=self.host, port=self.listen_port)
+        self.http_server = WSGIServer((self.host, self.listen_port), self.app)
+        self.http_server.serve_forever()
 
     def stop_component(self):
-        func = self.app.config.get("werkzeug.server.shutdown")
-        if func is None:
-            raise RuntimeError("Not running with the Werkzeug Server")
-        func()
+        if hasattr(self, 'http_server') and self.http_server.started:
+            try:
+                self.http_server.stop(timeout=10)
+            except Exception as e:
+                print("Error stopping Web UI server: %s", str(e))
 
     @abstractmethod
     def register_routes(self):
