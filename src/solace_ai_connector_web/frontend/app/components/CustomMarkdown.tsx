@@ -58,7 +58,7 @@ export const CustomMarkdown = ({ children, className = '' }: CustomMarkdownProps
         prose-pre:my-1
         prose-blockquote:my-1 dark:prose-blockquote:text-gray-300 dark:prose-blockquote:border-gray-700
         prose-hr:my-1
-        [&_table]:block [&_table]:overflow-x-auto
+        [&_table]:block scrollbar-themed [&_table]:overflow-x-auto
         [&>*:first-child]:!mt-0
         [&>*:last-child]:!mb-[-30px]
         ${className}
