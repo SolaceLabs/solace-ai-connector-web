@@ -3,6 +3,7 @@ from flask_cors import CORS
 import requests
 import uuid
 import json
+import certifi
 from datetime import datetime, timedelta
 from .server_base import RestBase, info as base_info
 from flask_wtf.csrf import generate_csrf, CSRFError
@@ -215,7 +216,7 @@ class WebChatServer(RestBase):
                     f"{self.authentication_base_url}/is_token_valid",
                     data=request_data,
                     headers=headers,
-                    verify = not self.local_dev
+                    verify=certifi.where() if not self.local_dev else False
                 )
                 
                 #if token is invalid try to refresh it
@@ -239,7 +240,7 @@ class WebChatServer(RestBase):
             json={
                 "refresh_token": refresh_token
             },
-            verify=not self.local_dev
+            verify=certifi.where() if not self.local_dev else False
         )
         
         if refresh_response.status_code == 200:
