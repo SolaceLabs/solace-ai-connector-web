@@ -15,7 +15,6 @@ permissions:
   id-token: write
   checks: write
   contents: write
-  packages: write
 
 jobs:
   release:
@@ -23,10 +22,7 @@ jobs:
     with:
       ENVIRONMENT: pypi
       version: ${{ github.event.inputs.version }}
-      npm_package_path: src/solace_ai_connector_web/frontend
-      node_version: 20
-      npm_lock_file: package-lock.json
-      pypi-project: solace-ai-connector-web
+      pypi-project: solace-ai-connector-slack
     secrets:
       COMMIT_KEY: ${{ secrets.COMMIT_KEY }}
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
