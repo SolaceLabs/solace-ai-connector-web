@@ -1,0 +1,21 @@
+version: 3
+project:
+  locator: SolaceLabs_solace-ai-connector-web
+  id: SolaceLabs_solace-ai-connector-web
+  name: solace-ai-connector-web
+  teams: []
+  labels:
+    - python
+vendoredDependencies:
+  forceRescans: false
+  scanMethod: CLILicenseScan
+  licenseScanPathFilters:
+    exclude:
+      - "./.git"
+      - "./.github"
+paths:
+  exclude:
+    - ./.git
+    - ./.github
+telemetry:
+  scope: full
