@@ -11,6 +11,7 @@ authors = [
 license = { file = "LICENSE" }
 readme = "README.md"
 classifiers = [
+    "Development Status :: 7 - Inactive",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
