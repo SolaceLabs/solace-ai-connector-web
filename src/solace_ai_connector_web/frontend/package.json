@@ -11,9 +11,9 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@remix-run/node": "^2.15.2",
-    "@remix-run/react": "^2.15.2",
-    "@remix-run/serve": "^2.15.2",
+    "@remix-run/node": "^2.17.5",
+    "@remix-run/react": "^2.17.5",
+    "@remix-run/serve": "^2.17.5",
     "html-react-parser": "^5.2.2",
     "isbot": "^4.1.0",
     "marked": "^15.0.6",
@@ -29,7 +29,7 @@
     "tailwind-scrollbar-hide": "^2.0.0"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.15.2",
+    "@remix-run/dev": "^2.17.5",
     "@tailwindcss/typography": "^0.5.16",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
